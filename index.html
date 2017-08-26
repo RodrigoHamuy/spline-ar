@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+	<title>Sample Three.js</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+	body {
+		margin: 0;
+		overflow: hidden;
+	}
+	#container canvas{
+		display: block;
+	}
+	</style>
+</head>
+<body>
+	<div class="slider_wrapper" style="display:none;">
+		<label for="posFactor">Pos Factor</label>
+		<input type="range" id="posFactor" class="slider" min="0" max="2" step="0.01" value="0.05">
+		<label for="posFactor">Y Factor</label>
+		<input type="range" id="yFactor" class="slider" min="0" max="10" step="0.01" value="5.0">
+	</div>
+	<div id="container"></div>
+	<script src="dist/js/script.js" charset="utf-8"></script>
+
+</body>
+</html>
