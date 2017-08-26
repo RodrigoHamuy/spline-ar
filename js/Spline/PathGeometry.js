@@ -46,7 +46,7 @@ function PathBufferGeometry( ctrlPoints, ctrlNormals, width, segments ){
 
     for (var i = 0; i < scope.segments +1; i++) {
       var forward = centerSpline.getTangent(i/ scope.segments );
-      var up = normalSpline.getPoint(i/ scope.segments );
+      var up = normalSpline.getPointAt(i/ scope.segments );
 
       var right = new THREE.Vector3()
       .crossVectors(forward, up)

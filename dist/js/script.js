@@ -106,7 +106,7 @@ function PathBufferGeometry( ctrlPoints, ctrlNormals, width, segments ){
 
     for (var i = 0; i < scope.segments +1; i++) {
       var forward = centerSpline.getTangent(i/ scope.segments );
-      var up = normalSpline.getPoint(i/ scope.segments );
+      var up = normalSpline.getPointAt(i/ scope.segments );
 
       var right = new THREE.Vector3()
       .crossVectors(forward, up)
@@ -2021,7 +2021,10 @@ require('./controls/DragControls.js');
   splineEditor,
   currDistance = 0,
   speed = 150,
-  player;
+  player,
+  cameraLookAt,
+  cameraReference,
+  debugCamera = false;
 
   init();
 
@@ -2071,6 +2074,21 @@ require('./controls/DragControls.js');
     var normal = pathMesh.geometry.getNormalAt( 0 );
     updatePlayerPosition( pos, normal );
 
+    if ( debugCamera ) {
+
+      material = new THREE.MeshBasicMaterial( {color: 0xff3333} );
+
+      cameraLookAt = new THREE.Mesh( geometry, material );
+      scene.add( cameraLookAt );
+
+      // geometry = new THREE.BoxGeometry( 10, 10, 10 );
+      material = new THREE.MeshBasicMaterial( {color: 0xff33ff} );
+
+      cameraReference = new THREE.Mesh( geometry, material );
+      scene.add( cameraReference );
+
+    }
+
   }
 
 
@@ -2118,16 +2136,16 @@ require('./controls/DragControls.js');
 
   function updateCameraPosition( pos, normal, pathDistance ) {
 
-    var distanceFromPlayer = -100;
+    var distanceFromPlayer = 50;
 
-    var forward = pathMesh.geometry.getTangent( currDistance / pathDistance );
-    console.log( forward );
+    var back = pathMesh.geometry.getTangent( currDistance / pathDistance )
+    .multiplyScalar( distanceFromPlayer );
 
-    camera.up.copy( normal ).negate();
-
-    pos.add( normal.multiplyScalar( -2 ) );
-
-    camera.position.copy( pos );//.sub( forward.addScalar( distanceFromPlayer ) );
+    var newPos = new THREE.Vector3()
+    .copy( normal )
+    .multiplyScalar( -25 )
+    .sub( back )
+    .add( pos );
 
     var next = ( currDistance + 75 ) / pathDistance;
 
@@ -2137,7 +2155,24 @@ require('./controls/DragControls.js');
 
     }
 
-    camera.lookAt( pathMesh.geometry.getPointAt( next ), normal );
+    var lookAtPos = pathMesh.geometry.getPointAt( next );
+
+    var cameraObj;
+
+    if ( debugCamera ) {
+
+      cameraObj = cameraReference;
+      cameraLookAt.position.copy( lookAtPos );
+
+    } else {
+
+      cameraObj = camera;
+      camera.up.copy( normal ).negate();
+
+    }
+
+    cameraObj.position.copy( newPos );
+    cameraObj.lookAt( lookAtPos );
 
   }
 
