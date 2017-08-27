@@ -40,7 +40,7 @@ require('./controls/DragControls.js');
   player,
   cameraLookAt,
   cameraReference,
-  debugCamera = false;
+  debugCamera = true;
 
   init();
 
@@ -88,7 +88,7 @@ require('./controls/DragControls.js');
     scene.add( player );
     var pos = pathMesh.geometry.getPointAt( 0 );
     var normal = pathMesh.geometry.getNormalAt( 0 );
-    updatePlayerPosition( pos, normal );
+    // updatePlayerPosition( pos, normal );
 
     if ( debugCamera ) {
 
@@ -131,7 +131,7 @@ require('./controls/DragControls.js');
 
       updateCameraPosition( pos.clone(), normal.clone(), pathDistance );
 
-      updatePlayerPosition( pos.clone(), normal.clone() );
+      updatePlayerPosition( pos.clone(), normal.clone(), pathDistance );
 
     }
 
@@ -142,11 +142,14 @@ require('./controls/DragControls.js');
     requestAnimationFrame( render );
   }
 
-  function updatePlayerPosition( pos, normal ) {
+  function updatePlayerPosition( pos, normal, pathDistance ) {
+
+    var forward = pathMesh.geometry.getTangent( currDistance / pathDistance )
+    .multiplyScalar( -1 );
 
     player.position.copy( pos )
     .add( new THREE.Vector3().addScaledVector( normal, -10 ) );
-    player.lookAt( new THREE.Vector3().addVectors( pos, normal) );
+    player.lookAt( new THREE.Vector3().addVectors( pos, forward ) );
 
   }
 

@@ -46,7 +46,7 @@ module.exports = function( dat, THREE, $ ) {
     splineGUI.add(guiModel, 'addCtrlNormal').name('+ Normal');
     splineGUI.add(guiModel, 'removeCtrlPoint').name('Remove selected');
 
-    splineGUI.add({width:mesh.geometry.width}, 'width', 10, 200)
+    splineGUI.add({width:mesh.geometry.width}, 'width', 10, 100)
     .name('Width')
     .onChange(function(value){
 
@@ -55,7 +55,7 @@ module.exports = function( dat, THREE, $ ) {
 
     });
 
-    splineGUI.add({segments:mesh.geometry.segments}, 'segments', 10, 200)
+    splineGUI.add({segments:mesh.geometry.segments}, 'segments', 10, 800)
     .name('Segments')
     .onChange(function(value){
 
@@ -85,7 +85,7 @@ module.exports = function( dat, THREE, $ ) {
     initCtrlPointsEditor();
 
     function updateCtrlPointPosition() {
-      
+
       var position = transformControl.object.position;
 
       var needUpdate = (
@@ -177,9 +177,18 @@ module.exports = function( dat, THREE, $ ) {
           case 82: // R
             transformControl.setMode('translate');
             break;
+          case 70: // F
+            focusOnSelected();
+            break;
         }
       });
 
+
+    }
+
+    function focusOnSelected() {
+
+      orbitControl.target.copy( transformControl.object.position );
 
     }
 

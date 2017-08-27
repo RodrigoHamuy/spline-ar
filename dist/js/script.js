@@ -62,6 +62,43 @@ function resize() {
 
 let THREE = require('three');
 
+function LinearTranstition( points ) {
+
+  this.points = points;
+
+}
+
+Object.assign( LinearTranstition.prototype, {
+
+  getPointAt: function ( at ) {
+
+    var maxIndex = this.points.length - 1;
+
+    var i = parseInt( at * maxIndex );
+
+    var i2 = ( i < maxIndex - 1 ) ? i +1 : i ;
+
+    var rest = ( at * maxIndex ) % 1;
+
+    var point1 = new THREE.Vector3()
+    .copy( this.points[ i ] )
+    .multiplyScalar( 1 - rest );
+
+    var point2 = new THREE.Vector3()
+    .copy( this.points[ i2 ] )
+    .multiplyScalar( rest );
+
+    var pointAt = new THREE.Vector3()
+    .addVectors( point1, point2 )
+    .normalize();
+
+    return pointAt;
+
+  }
+
+} );
+
+
 function PathBufferGeometry( ctrlPoints, ctrlNormals, width, segments ){
 
   this.type = 'PathBufferGeometry';
@@ -79,7 +116,7 @@ function PathBufferGeometry( ctrlPoints, ctrlNormals, width, segments ){
 
   let
   centerSpline = new THREE.CatmullRomCurve3( ctrlPoints ),
-  normalSpline = new THREE.CatmullRomCurve3(ctrlNormals),
+  normalSpline = new LinearTranstition(ctrlNormals),
   scope = this;
 
   normalSpline.tension = 0;
@@ -184,7 +221,7 @@ function PathBufferGeometry( ctrlPoints, ctrlNormals, width, segments ){
   function updateControlPoints(ctrlPoints, normalPoints){
     centerSpline = new THREE.CatmullRomCurve3( ctrlPoints );
     if (typeof normalPoints != 'undefined') {
-      normalSpline = new THREE.CatmullRomCurve3(normalPoints);
+      normalSpline = new LinearTranstition(normalPoints);
       normalSpline.tension = 0;
     }
     generateVertices();
@@ -1695,7 +1732,7 @@ module.exports = function( dat, THREE, $ ) {
     splineGUI.add(guiModel, 'addCtrlNormal').name('+ Normal');
     splineGUI.add(guiModel, 'removeCtrlPoint').name('Remove selected');
 
-    splineGUI.add({width:mesh.geometry.width}, 'width', 10, 200)
+    splineGUI.add({width:mesh.geometry.width}, 'width', 10, 100)
     .name('Width')
     .onChange(function(value){
 
@@ -1704,7 +1741,7 @@ module.exports = function( dat, THREE, $ ) {
 
     });
 
-    splineGUI.add({segments:mesh.geometry.segments}, 'segments', 10, 200)
+    splineGUI.add({segments:mesh.geometry.segments}, 'segments', 10, 800)
     .name('Segments')
     .onChange(function(value){
 
@@ -1734,7 +1771,7 @@ module.exports = function( dat, THREE, $ ) {
     initCtrlPointsEditor();
 
     function updateCtrlPointPosition() {
-      
+
       var position = transformControl.object.position;
 
       var needUpdate = (
@@ -1826,9 +1863,18 @@ module.exports = function( dat, THREE, $ ) {
           case 82: // R
             transformControl.setMode('translate');
             break;
+          case 70: // F
+            focusOnSelected();
+            break;
         }
       });
 
+
+    }
+
+    function focusOnSelected() {
+
+      orbitControl.target.copy( transformControl.object.position );
 
     }
 
@@ -2024,7 +2070,7 @@ require('./controls/DragControls.js');
   player,
   cameraLookAt,
   cameraReference,
-  debugCamera = false;
+  debugCamera = true;
 
   init();
 
@@ -2072,7 +2118,7 @@ require('./controls/DragControls.js');
     scene.add( player );
     var pos = pathMesh.geometry.getPointAt( 0 );
     var normal = pathMesh.geometry.getNormalAt( 0 );
-    updatePlayerPosition( pos, normal );
+    // updatePlayerPosition( pos, normal );
 
     if ( debugCamera ) {
 
@@ -2115,7 +2161,7 @@ require('./controls/DragControls.js');
 
       updateCameraPosition( pos.clone(), normal.clone(), pathDistance );
 
-      updatePlayerPosition( pos.clone(), normal.clone() );
+      updatePlayerPosition( pos.clone(), normal.clone(), pathDistance );
 
     }
 
@@ -2126,11 +2172,14 @@ require('./controls/DragControls.js');
     requestAnimationFrame( render );
   }
 
-  function updatePlayerPosition( pos, normal ) {
+  function updatePlayerPosition( pos, normal, pathDistance ) {
+
+    var forward = pathMesh.geometry.getTangent( currDistance / pathDistance )
+    .multiplyScalar( -1 );
 
     player.position.copy( pos )
     .add( new THREE.Vector3().addScaledVector( normal, -10 ) );
-    player.lookAt( new THREE.Vector3().addVectors( pos, normal) );
+    player.lookAt( new THREE.Vector3().addVectors( pos, forward ) );
 
   }
 

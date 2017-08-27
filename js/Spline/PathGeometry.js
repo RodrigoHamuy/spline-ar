@@ -2,6 +2,43 @@
 
 let THREE = require('three');
 
+function LinearTranstition( points ) {
+
+  this.points = points;
+
+}
+
+Object.assign( LinearTranstition.prototype, {
+
+  getPointAt: function ( at ) {
+
+    var maxIndex = this.points.length - 1;
+
+    var i = parseInt( at * maxIndex );
+
+    var i2 = ( i < maxIndex - 1 ) ? i +1 : i ;
+
+    var rest = ( at * maxIndex ) % 1;
+
+    var point1 = new THREE.Vector3()
+    .copy( this.points[ i ] )
+    .multiplyScalar( 1 - rest );
+
+    var point2 = new THREE.Vector3()
+    .copy( this.points[ i2 ] )
+    .multiplyScalar( rest );
+
+    var pointAt = new THREE.Vector3()
+    .addVectors( point1, point2 )
+    .normalize();
+
+    return pointAt;
+
+  }
+
+} );
+
+
 function PathBufferGeometry( ctrlPoints, ctrlNormals, width, segments ){
 
   this.type = 'PathBufferGeometry';
@@ -19,7 +56,7 @@ function PathBufferGeometry( ctrlPoints, ctrlNormals, width, segments ){
 
   let
   centerSpline = new THREE.CatmullRomCurve3( ctrlPoints ),
-  normalSpline = new THREE.CatmullRomCurve3(ctrlNormals),
+  normalSpline = new LinearTranstition(ctrlNormals),
   scope = this;
 
   normalSpline.tension = 0;
@@ -124,7 +161,7 @@ function PathBufferGeometry( ctrlPoints, ctrlNormals, width, segments ){
   function updateControlPoints(ctrlPoints, normalPoints){
     centerSpline = new THREE.CatmullRomCurve3( ctrlPoints );
     if (typeof normalPoints != 'undefined') {
-      normalSpline = new THREE.CatmullRomCurve3(normalPoints);
+      normalSpline = new LinearTranstition(normalPoints);
       normalSpline.tension = 0;
     }
     generateVertices();
