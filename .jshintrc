@@ -3,6 +3,6 @@
   "esversion": 6,
   "browser": true,
   "globals": {
-    "requestAnimationFrame": true
+    "THREE": true
   }
 }

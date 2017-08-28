@@ -29,7 +29,9 @@ function initBrowserify() {
     debug: true
   };
   var opts = assign({}, watchify.args, customOpts);
-  var b = watchify(browserify(opts));
+  var b = watchify(
+    browserify(opts)
+  );
   if(USE_BABEL){
     b.transform(babel, {
     presets: [

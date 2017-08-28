@@ -1,3 +1,10 @@
+let
+Game = require( './game/Game.js' );
+
 (function () {
-  require('./pathGeometryExample.js');
+
+  'use strict';
+
+  var game = new Game();
+
 })();

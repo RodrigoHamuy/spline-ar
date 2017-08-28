@@ -1,7 +1,5 @@
 "use strict";
 
-let THREE = require('three');
-
 function LinearTranstition( points ) {
 
   this.points = points;
