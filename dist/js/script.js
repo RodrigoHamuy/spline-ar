@@ -1019,6 +1019,9 @@ Object.defineProperties( OrbitControls.prototype, {
 module.exports = OrbitControls;
 
 },{}],2:[function(require,module,exports){
+let
+OrbitControls = require( '../controls/OrbitControls' );
+
 class CameraManager {
 
   constructor() {
@@ -1034,13 +1037,15 @@ class CameraManager {
     );
     this.camera.position.z = 300;
 
+    let controls = new OrbitControls( this.camera );
+
   }
 
 }
 
 module.exports = CameraManager;
 
-},{}],3:[function(require,module,exports){
+},{"../controls/OrbitControls":1}],3:[function(require,module,exports){
 let
 WindowManager = require( './WindowManager.js' ),
 Player = require( './Player.js' ),
@@ -1048,7 +1053,7 @@ SceneManager = require( './SceneManager.js' ),
 CameraManager = require( './CameraManager' ),
 TrackManager = require( './TrackManager' ),
 NavTrackAgent = require( './NavTrackAgent' ),
-OrbitControls = require( '../controls/OrbitControls' );
+PlayerCamera = require( './PlayerCamera' );
 
 class Game {
 
@@ -1058,7 +1063,6 @@ class Game {
     this.windowManager = new WindowManager();
     this.sceneManager = new SceneManager();
     let cameraManager = new CameraManager();
-    let controls = new OrbitControls( cameraManager.camera );
     this.clock = new THREE.Clock();
 
     this.windowManager.scene = this.sceneManager.scene;
@@ -1073,6 +1077,7 @@ class Game {
 
     this.navTrackAgent = new NavTrackAgent( this );
     this.player = new Player( this.navTrackAgent );
+    this.playerCamera = new PlayerCamera( this );
 
     this.player.track = this.trackManager.mesh;
     this.player.updatePosition();
@@ -1094,7 +1099,7 @@ class Game {
 
 module.exports = Game;
 
-},{"../controls/OrbitControls":1,"./CameraManager":2,"./NavTrackAgent":4,"./Player.js":5,"./SceneManager.js":6,"./TrackManager":8,"./WindowManager.js":9}],4:[function(require,module,exports){
+},{"./CameraManager":2,"./NavTrackAgent":4,"./Player.js":5,"./PlayerCamera":6,"./SceneManager.js":7,"./TrackManager":9,"./WindowManager.js":10}],4:[function(require,module,exports){
 let EventDispatcher = require( '../../vendor/EventDispatcher.js' );
 
 class NavTrackAgent extends EventDispatcher {
@@ -1144,7 +1149,7 @@ class NavTrackAgent extends EventDispatcher {
 
 module.exports = NavTrackAgent;
 
-},{"../../vendor/EventDispatcher.js":11}],5:[function(require,module,exports){
+},{"../../vendor/EventDispatcher.js":12}],5:[function(require,module,exports){
 class Player {
 
   constructor ( navTrackAgent ) {
@@ -1193,6 +1198,69 @@ class Player {
 module.exports = Player;
 
 },{}],6:[function(require,module,exports){
+class PlayerCamera {
+
+  constructor( game ) {
+
+    this.margin = {
+      back: -10,
+      top: 10
+    };
+
+    this.game = game;
+    this.scene = game.sceneManager.scene;
+    this.track = game.trackManager.mesh;
+    this.navTrackAgent = game.navTrackAgent;
+
+    var geometry = new THREE.BoxGeometry( 1, 3, 10 );
+    var material = new THREE.MeshBasicMaterial( {color: 0x0000ff} );
+
+    this.helperCameraMesh = new THREE.Mesh( geometry, material );
+    this.helperCameraMesh.add( new THREE.AxisHelper( 10 ) );
+    this.position = this.helperCameraMesh.position;
+
+    material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+    geometry = new THREE.BoxGeometry( 3, 3, 3 );
+
+    this.helperTargetMesh = new THREE.Mesh( geometry, material );
+    this.helperTargetMesh.add( new THREE.AxisHelper( 10 ) );
+    this.targetPosition = this.helperTargetMesh.position;
+
+    this.scene.add( this.helperCameraMesh );
+    this.scene.add( this.helperTargetMesh );
+
+    this.navTrackAgent.addEventListener(
+      'change',
+      this.updatePosition.bind( this )
+    );
+
+  }
+
+  updatePosition() {
+
+    var amountTraveled = this.navTrackAgent.amountTraveled;
+
+    var pos = this.track.geometry.getPointAt( amountTraveled );
+
+    var normal = this.track.geometry.getNormalAt( amountTraveled );
+
+    var forward = this.track.geometry.getTangent( amountTraveled );
+
+    var cameraPosition = new THREE.Vector3().copy( pos )
+    .addScaledVector( forward, this.margin.back )
+    .addScaledVector( normal, this.margin.top );
+
+    console.log( cameraPosition );
+
+    this.position.copy( cameraPosition );
+
+  }
+
+}
+
+module.exports = PlayerCamera;
+
+},{}],7:[function(require,module,exports){
 class SceneManager {
 
   constructor(){
@@ -1233,7 +1301,7 @@ class SceneManager {
 
 module.exports = SceneManager;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 class LinearTranstition {
 
   constructor( points ) {
@@ -1419,7 +1487,7 @@ class TrackGeometry extends THREE.BufferGeometry {
 
 module.exports = TrackGeometry;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 let TrackGeometry = require( './TrackGeometry.js' );
 
 class TrackManager {
@@ -1484,7 +1552,7 @@ class TrackManager {
 
 module.exports = TrackManager;
 
-},{"./TrackGeometry.js":7}],9:[function(require,module,exports){
+},{"./TrackGeometry.js":8}],10:[function(require,module,exports){
 let EventDispatcher = require( '../../vendor/EventDispatcher.js' );
 
 class WindowManager extends EventDispatcher {
@@ -1525,7 +1593,7 @@ class WindowManager extends EventDispatcher {
 
 module.exports = WindowManager;
 
-},{"../../vendor/EventDispatcher.js":11}],10:[function(require,module,exports){
+},{"../../vendor/EventDispatcher.js":12}],11:[function(require,module,exports){
 let
 Game = require( './game/Game.js' );
 
@@ -1537,7 +1605,7 @@ Game = require( './game/Game.js' );
 
 })();
 
-},{"./game/Game.js":3}],11:[function(require,module,exports){
+},{"./game/Game.js":3}],12:[function(require,module,exports){
 /**
  * @author mrdoob / http://mrdoob.com/
  */
@@ -1624,6 +1692,6 @@ Object.assign( EventDispatcher.prototype, {
 
 module.exports = EventDispatcher;
 
-},{}]},{},[10])
+},{}]},{},[11])
 
 //# sourceMappingURL=script.js.map

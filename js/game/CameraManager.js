@@ -1,3 +1,6 @@
+let
+OrbitControls = require( '../controls/OrbitControls' );
+
 class CameraManager {
 
   constructor() {
@@ -12,6 +15,8 @@ class CameraManager {
       viewAngle, aspectRatio, near, far
     );
     this.camera.position.z = 300;
+
+    let controls = new OrbitControls( this.camera );
 
   }
 

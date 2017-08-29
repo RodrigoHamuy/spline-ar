@@ -5,7 +5,7 @@ SceneManager = require( './SceneManager.js' ),
 CameraManager = require( './CameraManager' ),
 TrackManager = require( './TrackManager' ),
 NavTrackAgent = require( './NavTrackAgent' ),
-OrbitControls = require( '../controls/OrbitControls' );
+PlayerCamera = require( './PlayerCamera' );
 
 class Game {
 
@@ -15,7 +15,6 @@ class Game {
     this.windowManager = new WindowManager();
     this.sceneManager = new SceneManager();
     let cameraManager = new CameraManager();
-    let controls = new OrbitControls( cameraManager.camera );
     this.clock = new THREE.Clock();
 
     this.windowManager.scene = this.sceneManager.scene;
@@ -30,6 +29,7 @@ class Game {
 
     this.navTrackAgent = new NavTrackAgent( this );
     this.player = new Player( this.navTrackAgent );
+    this.playerCamera = new PlayerCamera( this );
 
     this.player.track = this.trackManager.mesh;
     this.player.updatePosition();
