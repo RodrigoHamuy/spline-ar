@@ -3,8 +3,8 @@ class PlayerCamera {
   constructor( game ) {
 
     this.margin = {
-      back: -10,
-      top: 10
+      back: -20,
+      top: 20
     };
 
     this.game = game;
@@ -38,21 +38,32 @@ class PlayerCamera {
 
   updatePosition() {
 
+    var scope = this;
     var amountTraveled = this.navTrackAgent.amountTraveled;
-
     var pos = this.track.geometry.getPointAt( amountTraveled );
-
     var normal = this.track.geometry.getNormalAt( amountTraveled );
-
     var forward = this.track.geometry.getTangent( amountTraveled );
+    var next = this.navTrackAgent.nextAmountTraveled( 75 );
+    var lookAtPos = this.track.geometry.getPointAt( next );
 
-    var cameraPosition = new THREE.Vector3().copy( pos )
-    .addScaledVector( forward, this.margin.back )
-    .addScaledVector( normal, this.margin.top );
+    updateCameraPos();
+    updateCameraRotation();
 
-    console.log( cameraPosition );
+    function updateCameraPos() {
 
-    this.position.copy( cameraPosition );
+      var cameraPosition = new THREE.Vector3().copy( pos )
+      .addScaledVector( forward, scope.margin.back )
+      .addScaledVector( normal, scope.margin.top );
+
+      scope.position.copy( cameraPosition );
+
+    }
+
+    function updateCameraRotation() {
+
+      scope.helperCameraMesh.lookAt( lookAtPos );
+
+    }
 
   }
 

@@ -43,6 +43,14 @@ class NavTrackAgent extends EventDispatcher {
 
   }
 
+  nextAmountTraveled( add ) {
+
+    var next = ( this._currentDistance + add ) / this.track.getLength();
+
+    return next < 1 ? next : 1;
+
+  }
+
 }
 
 module.exports = NavTrackAgent;
