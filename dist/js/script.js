@@ -1083,6 +1083,11 @@ class Game {
   }
 
   init(display){
+
+    if (display === null) {
+      THREE.ARUtils.displayUnsupportedMessage();
+      return;
+    }
     var dom = document.getElementById( 'container' );
     this.vrDisplay = display;
     this.renderer = new THREE.WebGLRenderer({ alpha: true });
